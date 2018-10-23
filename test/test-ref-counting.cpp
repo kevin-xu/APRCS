@@ -35,6 +35,8 @@ protected:
   }
 };
 
+static_assert(RefCounting::CHECK<_TestRefCountingObject>::value, "");
+
 int main(int argc, char const *argv[])
 {
   _TestRefCountingObject *trco = new _TestRefCountingObject();
