@@ -74,12 +74,9 @@ public:
   struct SIGNALS {};
 
   struct ConnectionId {
-  private:
     int signal;
 
     unsigned subconnectionId;
-
-    friend class Signaling;
   };
 
   template <int signal, class S, class ... AsD>
