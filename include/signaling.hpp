@@ -90,26 +90,26 @@ public:
 
     static_assert(std::is_same<Slot2<S, AsD...>, typename _SIGNATURE::template SLOT<S>>::value, "");
 
-    DU &dci = self->_ms2dci[signal];
+    DU &dsi = self->_ms2dsi[signal];
 
-    bool empty = dci.empty();
+    bool empty = dsi.empty();
 
     unsigned subconnectionId;
 
     if (empty) {
-      if (self->_ms2ci.count(signal) == 0)
-        self->_ms2ci[signal] = 0;
+      if (self->_ms2si.count(signal) == 0)
+        self->_ms2si[signal] = 0;
 
-      subconnectionId = self->_ms2ci[signal];
+      subconnectionId = self->_ms2si[signal];
     } else
-      subconnectionId = dci.front();
+      subconnectionId = dsi.front();
 
-    self->_ms2mci2sd[signal].emplace(subconnectionId, PSPV((Slot0)slot, data));
+    self->_ms2msi2sd[signal].emplace(subconnectionId, PSPV((Slot0)slot, data));
 
     if (empty)
-      ++self->_ms2ci[signal];
+      ++self->_ms2si[signal];
     else
-      dci.pop_front();
+      dsi.pop_front();
 
     ConnectionId connectionId;
 
@@ -126,40 +126,40 @@ public:
 
     unsigned subconnectionId = connectionId.subconnectionId;
 
-    if (_ms2mci2sd.count(signal) == 0)
+    if (_ms2msi2sd.count(signal) == 0)
       return;
 
-    MUPSPV &mci2sd = _ms2mci2sd[signal];
+    MUPSPV &msi2sd = _ms2msi2sd[signal];
 
-    if (mci2sd.count(subconnectionId) == 0)
+    if (msi2sd.count(subconnectionId) == 0)
       return;
 
-    mci2sd.erase(subconnectionId);
+    msi2sd.erase(subconnectionId);
 
-    _ms2dci[signal].emplace_back(subconnectionId);
+    _ms2dsi[signal].emplace_back(subconnectionId);
   }
 
   void disconnect(int signal) noexcept
   {
-    if (_ms2mci2sd.count(signal) == 0)
+    if (_ms2msi2sd.count(signal) == 0)
       return;
 
-    _ms2mci2sd[signal].clear();
+    _ms2msi2sd[signal].clear();
 
-    if (_ms2dci.count(signal) == 0)
+    if (_ms2dsi.count(signal) == 0)
       return;
 
-    _ms2dci[signal].clear();
+    _ms2dsi[signal].clear();
 
-    if (_ms2ci.count(signal) == 0)
+    if (_ms2si.count(signal) == 0)
       return;
 
-    _ms2ci[signal] = 0;
+    _ms2si[signal] = 0;
   }
 
   void disconnect(void) noexcept
   {
-    for (auto i = _ms2ci.cbegin(), end = _ms2ci.cend(); i != end; ++i)
+    for (auto i = _ms2si.cbegin(), end = _ms2si.cend(); i != end; ++i)
       disconnect(i->first);
   }
 
@@ -187,9 +187,9 @@ protected:
 
     typedef typename _SIGNATURE::template SLOT<S> _Slot;
 
-    MUPSPV const &mci2sd = self->_ms2mci2sd[signal];
+    MUPSPV const &msi2sd = self->_ms2msi2sd[signal];
 
-    for (auto i = mci2sd.cbegin(), end = mci2sd.cend(); i != end; ++i) {
+    for (auto i = msi2sd.cbegin(), end = msi2sd.cend(); i != end; ++i) {
       _Slot slot = (_Slot)i->second.first;
 
       void *data = i->second.second;
@@ -220,11 +220,11 @@ private:
   typedef std::map<unsigned, PSPV> MUPSPV;
   typedef std::map<int, MUPSPV> MIMUPSPV;
 
-  MIU _ms2ci;
+  MIU _ms2si;
 
-  MIDU _ms2dci;
+  MIDU _ms2dsi;
 
-  MIMUPSPV _ms2mci2sd;
+  MIMUPSPV _ms2msi2sd;
 };
 
 #endif
