@@ -51,14 +51,12 @@ public:
 };
 
 template <>
-struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_VOID>
-{
+struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_VOID> {
   typedef Signaling::SIGNATURE<void> SIGNATURE;
 };
 
 template <>
-struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>
-{
+struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED> {
   typedef Signaling::SIGNATURE<_PASS_NON_VOID_FIXED__SIGNATURE> SIGNATURE;
 };
 
