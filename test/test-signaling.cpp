@@ -5,6 +5,7 @@
  */
 
 #include <cassert>
+#include <cstdlib>
 
 #include <iostream>
 #include <set>
@@ -43,7 +44,7 @@ public:
   ~_TestSignalingObject() = default;
 
   template <int signal, class ... As>
-  void notify(As... arguments)
+  void notify(As... arguments) noexcept
   {
     emit<signal>(this, arguments...);
   }
@@ -67,6 +68,10 @@ static vector<_TestSignalingObject *> _tsosPassingVoid;
 
 static vector<void *> _vdataPassingVoid;
 
+static unsigned _nDetachingDataPassingVoid = 0;
+
+static vector<void *> _vdetachedDataPassingVoid;
+
 static unsigned _nPassingNonVoidFixed = 0;
 
 static vector<_TestSignalingObject *> _tsosPassingNonVoidFixed;
@@ -74,6 +79,10 @@ static vector<_TestSignalingObject *> _tsosPassingNonVoidFixed;
 static vector<Arguments> _argumentssPassingNonVoidFixed;
 
 static vector<void *> _vdataPassingNonVoidFixed;
+
+static unsigned _nDetachingDataPassingNonVoidFixed = 0;
+
+static vector<void *> _vdetachedDataPassingNonVoidFixed;
 
 static void _recoverState(void) noexcept
 {
@@ -83,6 +92,10 @@ static void _recoverState(void) noexcept
 
   _vdataPassingVoid.clear();
 
+  _nDetachingDataPassingVoid = 0;
+
+  _vdetachedDataPassingVoid.clear();
+
   _nPassingNonVoidFixed = 0;
 
   _tsosPassingNonVoidFixed.clear();
@@ -90,34 +103,68 @@ static void _recoverState(void) noexcept
   _argumentssPassingNonVoidFixed.clear();
 
   _vdataPassingNonVoidFixed.clear();
+
+  _nDetachingDataPassingNonVoidFixed = 0;
+
+  _vdetachedDataPassingNonVoidFixed.clear();
 }
 
-static void _handlePassVoid(_TestSignalingObject &tso, void *data)
+static void _detechDataPassingVoid(void *data) noexcept
 {
-  ++_nPassingVoid;
+  try {
+    ++_nDetachingDataPassingVoid;
 
-  _tsosPassingVoid.emplace_back(&tso);
+    _vdetachedDataPassingVoid.emplace_back(data);
+  } catch (...) {
+    abort();
+  }
+}
 
-  _vdataPassingVoid.emplace_back(data);
+static void _handlePassVoid(_TestSignalingObject &tso, void *data) noexcept
+{
+  try {
+    ++_nPassingVoid;
+
+    _tsosPassingVoid.emplace_back(&tso);
+
+    _vdataPassingVoid.emplace_back(data);
+  } catch (...) {
+    abort();
+  }
+}
+
+static void _detechDataPassingNonVoidFixed(void *data) noexcept
+{
+  try {
+    ++_nDetachingDataPassingNonVoidFixed;
+
+    _vdetachedDataPassingNonVoidFixed.emplace_back(data);
+  } catch (...) {
+    abort();
+  }
 }
 
 template <class ... As>
-void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, void *data)
+void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, void *data) noexcept
 {
-  ++_nPassingNonVoidFixed;
+  try {
+    ++_nPassingNonVoidFixed;
 
-  _tsosPassingNonVoidFixed.emplace_back(&tso);
+    _tsosPassingNonVoidFixed.emplace_back(&tso);
 
-  _argumentssPassingNonVoidFixed.emplace_back(arguments...);
+    _argumentssPassingNonVoidFixed.emplace_back(arguments...);
 
-  _vdataPassingNonVoidFixed.emplace_back(data);
+    _vdataPassingNonVoidFixed.emplace_back(data);
+  } catch (...) {
+    abort();
+  }
 }
 
 int main(int argc, char const *argv[])
 {
   _TestSignalingObject tso;
 
-  void *data = new char;
+  char *data = new char;
 
   unsigned n = rand(_RAND_MAX);
 
@@ -127,7 +174,8 @@ int main(int argc, char const *argv[])
     cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
         &tso,
         &_handlePassVoid,
-        data);
+        data,
+        &_detechDataPassingVoid);
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
@@ -149,9 +197,18 @@ int main(int argc, char const *argv[])
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
     tso.disconnect(cis[*i]);
 
+  size_t sis = si.size();
+
+  assert(_nDetachingDataPassingVoid == sis);
+
+  for (auto i = _vdetachedDataPassingVoid.begin(), end = _vdetachedDataPassingVoid.end();
+      i != end;
+      ++i)
+    assert(*i == data);
+
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
-  assert(_nPassingVoid == n - si.size());
+  assert(_nPassingVoid == n - sis);
 
   for (auto i = _tsosPassingVoid.begin(), end = _tsosPassingVoid.end(); i != end; ++i)
     assert(*i == &tso);
@@ -162,6 +219,13 @@ int main(int argc, char const *argv[])
   _recoverState();
 
   tso.disconnect(_TestSignalingObject::SIGNAL_PASS_VOID);
+
+  assert(_nDetachingDataPassingVoid == n - sis);
+
+  for (auto i = _vdetachedDataPassingVoid.begin(), end = _vdetachedDataPassingVoid.end();
+      i != end;
+      ++i)
+    assert(*i == data);
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
@@ -179,7 +243,8 @@ int main(int argc, char const *argv[])
     cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
         &tso,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
-        data);
+        data,
+        &_detechDataPassingNonVoidFixed);
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
@@ -210,9 +275,19 @@ int main(int argc, char const *argv[])
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
     tso.disconnect(cis[*i]);
 
+  sis = si.size();
+
+  assert(_nDetachingDataPassingNonVoidFixed == sis);
+
+  for (auto i = _vdetachedDataPassingNonVoidFixed.begin(),
+      end = _vdetachedDataPassingNonVoidFixed.end();
+      i != end;
+      ++i)
+    assert(*i == data);
+
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
-  assert(_nPassingNonVoidFixed == n - si.size());
+  assert(_nPassingNonVoidFixed == n - sis);
 
   for (auto i = _tsosPassingNonVoidFixed.begin(), end = _tsosPassingNonVoidFixed.end();
       i != end;
@@ -233,6 +308,14 @@ int main(int argc, char const *argv[])
 
   tso.disconnect(_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED);
 
+  assert(_nDetachingDataPassingNonVoidFixed == n - sis);
+
+  for (auto i = _vdetachedDataPassingNonVoidFixed.begin(),
+      end = _vdetachedDataPassingNonVoidFixed.end();
+      i != end;
+      ++i)
+    assert(*i == data);
+
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingNonVoidFixed == 0);
@@ -247,7 +330,8 @@ int main(int argc, char const *argv[])
     cis1[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
         &tso,
         &_handlePassVoid,
-        data);
+        data,
+        &_detechDataPassingVoid);
 
   unsigned n2 = rand(_RAND_MAX);
 
@@ -257,7 +341,8 @@ int main(int argc, char const *argv[])
     cis2[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
         &tso,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
-        data);
+        data,
+        &_detechDataPassingNonVoidFixed);
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
@@ -292,6 +377,21 @@ int main(int argc, char const *argv[])
 
   tso.disconnect();
 
+  assert(_nDetachingDataPassingVoid == n1);
+
+  for (auto i = _vdetachedDataPassingVoid.begin(), end = _vdetachedDataPassingVoid.end();
+      i != end;
+      ++i)
+    assert(*i == data);
+
+  assert(_nDetachingDataPassingNonVoidFixed == n2);
+
+  for (auto i = _vdetachedDataPassingNonVoidFixed.begin(),
+      end = _vdetachedDataPassingNonVoidFixed.end();
+      i != end;
+      ++i)
+    assert(*i == data);
+
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
@@ -299,6 +399,8 @@ int main(int argc, char const *argv[])
   assert(_nPassingVoid == 0);
 
   assert(_nPassingNonVoidFixed == 0);
+
+  delete data;
 
   return 0;
 }
