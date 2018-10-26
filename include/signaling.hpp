@@ -31,6 +31,8 @@
 
 # include <deque>
 # include <map>
+# include <stdexcept>
+# include <tuple>
 # include <type_traits>
 # include <utility>
 
@@ -41,15 +43,17 @@ public:
   template <class S>
   using EIIBOSSVIT = typename std::enable_if<std::is_base_of<Signaling, S>::value, int>::type;
 
+  using Slot0 = void (*)(...) noexcept;
+
 private:
   template <class S, class ... As>
   struct _Slot {
-    typedef void (*Type)(S &signaling, As... arguments, void *data);
+    using Type = void (*)(S &signaling, As... arguments, void *data) noexcept;
   };
 
   template <class S>
   struct _Slot<S, void> {
-    typedef void (*Type)(S &signaling, void *data);
+    using Type = void (*)(S &signaling, void *data) noexcept;
   };
 
 public:
@@ -57,7 +61,9 @@ public:
   using Slot = typename _Slot<S, As...>::Type;
 
   template <class S, class ... AsD>
-  using Slot2 = void (*)(S &signaling, AsD... argumentsAndData);
+  using Slot2 = void (*)(S &signaling, AsD... argumentsAndData) noexcept;
+
+  using DetachData = void (*)(void *data) noexcept;
 
 private:
   template <class ... As>
@@ -80,7 +86,11 @@ public:
   };
 
   template <int signal, class S, class ... AsD>
-  static ConnectionId connect(S *self, Slot2<S, AsD...> slot, void *data)
+  static ConnectionId connect(
+      S *self,
+      Slot2<S, AsD...> slot,
+      void *data,
+      DetachData detachData = nullptr)
   {
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
@@ -90,34 +100,31 @@ public:
 
     static_assert(std::is_same<Slot2<S, AsD...>, typename _SIGNATURE::template SLOT<S>>::value, "");
 
-    DU &dsi = self->_ms2dsi[signal];
+    if (slot == nullptr)
+      throw std::runtime_error("");
 
-    bool empty = dsi.empty();
+    if (self->_ms2si.count(signal) == 0)
+      self->_ms2si[signal] = 0;
+
+    auto isdsi = self->_ms2dsi.find(signal);
+
+    bool empty = isdsi == self->_ms2dsi.end() ? true : isdsi->second.empty();
 
     unsigned subconnectionId;
 
-    if (empty) {
-      if (self->_ms2si.count(signal) == 0)
-        self->_ms2si[signal] = 0;
-
+    if (empty)
       subconnectionId = self->_ms2si[signal];
-    } else
-      subconnectionId = dsi.front();
+    else
+      subconnectionId = isdsi->second.front();
 
-    self->_ms2msi2sd[signal].emplace(subconnectionId, PSPV((Slot0)slot, data));
+    self->_ms2msi2sddd[signal].emplace(subconnectionId, TSPVDD((Slot0)slot, data, detachData));
 
     if (empty)
       ++self->_ms2si[signal];
     else
-      dsi.pop_front();
+      isdsi->second.pop_front();
 
-    ConnectionId connectionId;
-
-    connectionId.signal = signal;
-
-    connectionId.subconnectionId = subconnectionId;
-
-    return connectionId;
+    return {signal, subconnectionId};
   }
 
   void disconnect(ConnectionId const &connectionId)
@@ -126,41 +133,49 @@ public:
 
     unsigned subconnectionId = connectionId.subconnectionId;
 
-    if (_ms2msi2sd.count(signal) == 0)
+    auto ismsi2sddd = _ms2msi2sddd.find(signal);
+
+    if (ismsi2sddd == _ms2msi2sddd.end())
       return;
 
-    MUPSPV &msi2sd = _ms2msi2sd[signal];
+    MUTSPVDD &msi2sddd = ismsi2sddd->second;
 
-    if (msi2sd.count(subconnectionId) == 0)
+    auto isisddd = msi2sddd.find(subconnectionId);
+
+    if (isisddd == msi2sddd.end())
       return;
-
-    msi2sd.erase(subconnectionId);
 
     _ms2dsi[signal].emplace_back(subconnectionId);
+
+    TSPVDD const &sddd = isisddd->second;
+
+    void *data = std::get<1>(sddd);
+
+    DetachData detachData = std::get<2>(sddd);
+
+    if (detachData != nullptr)
+      (*detachData)(data);
+
+    msi2sddd.erase(subconnectionId);
   }
 
   void disconnect(int signal) noexcept
   {
-    if (_ms2msi2sd.count(signal) == 0)
+    auto ismsi2sddd = _ms2msi2sddd.find(signal);
+
+    if (ismsi2sddd == _ms2msi2sddd.end())
       return;
 
-    _ms2msi2sd[signal].clear();
-
-    if (_ms2dsi.count(signal) == 0)
-      return;
-
-    _ms2dsi[signal].clear();
-
-    if (_ms2si.count(signal) == 0)
-      return;
-
-    _ms2si[signal] = 0;
+    disconnect(*ismsi2sddd);
   }
 
   void disconnect(void) noexcept
   {
-    for (auto i = _ms2si.cbegin(), end = _ms2si.cend(); i != end; ++i)
-      disconnect(i->first);
+    if (_ms2msi2sddd.empty())
+      return;
+
+    for (auto i = _ms2msi2sddd.begin(), end = _ms2msi2sddd.end(); i != end; ++i)
+      disconnect(*i);
   }
 
 protected:
@@ -177,7 +192,7 @@ protected:
   Signaling &operator=(Signaling &&signaling) = default;
 
   template <int signal, class S, class ... As>
-  static void emit(S *self, As... arguments)
+  static void emit(S *self, As... arguments) noexcept
   {
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
@@ -187,12 +202,22 @@ protected:
 
     typedef typename _SIGNATURE::template SLOT<S> _Slot;
 
-    MUPSPV const &msi2sd = self->_ms2msi2sd[signal];
+    auto ismsi2sddd = self->_ms2msi2sddd.find(signal);
 
-    for (auto i = msi2sd.cbegin(), end = msi2sd.cend(); i != end; ++i) {
-      _Slot slot = (_Slot)i->second.first;
+    if (ismsi2sddd == self->_ms2msi2sddd.end())
+      return;
 
-      void *data = i->second.second;
+    MUTSPVDD const &msi2sddd = ismsi2sddd->second;
+
+    if (msi2sddd.empty())
+      return;
+
+    for (auto i = msi2sddd.cbegin(), end = msi2sddd.cend(); i != end; ++i) {
+      TSPVDD const &sddd = i->second;
+
+      _Slot slot = (_Slot)std::get<0>(sddd);
+
+      void *data = std::get<1>(sddd);
 
       (*slot)(*self, arguments..., data);
     }
@@ -214,17 +239,45 @@ private:
   typedef std::deque<unsigned> DU;
   typedef std::map<int, DU> MIDU;
 
-  typedef void (*Slot0)(...);
-
-  typedef std::pair<Slot0, void *> PSPV;
-  typedef std::map<unsigned, PSPV> MUPSPV;
-  typedef std::map<int, MUPSPV> MIMUPSPV;
+  typedef std::tuple<Slot0, void *, DetachData> TSPVDD;
+  typedef std::map<unsigned, TSPVDD> MUTSPVDD;
+  typedef std::map<int, MUTSPVDD> MIMUTSPVDD;
 
   MIU _ms2si;
 
   MIDU _ms2dsi;
 
-  MIMUPSPV _ms2msi2sd;
+  MIMUTSPVDD _ms2msi2sddd;
+
+  void disconnect(MIMUTSPVDD::value_type &smsi2sddd) noexcept
+  {
+    int signal = smsi2sddd.first;
+
+    MUTSPVDD &msi2sddd = smsi2sddd.second;
+
+    if (msi2sddd.empty())
+      return;
+
+    for (auto i = msi2sddd.cbegin(), end = msi2sddd.cend(); i != end; ++i) {
+      TSPVDD const &sddd = i->second;
+
+      void *data = std::get<1>(sddd);
+
+      DetachData detachData = std::get<2>(sddd);
+
+      if (detachData != nullptr)
+        (*detachData)(data);
+    }
+
+    msi2sddd.clear();
+
+    auto isdsi = _ms2dsi.find(signal);
+
+    if (isdsi != _ms2dsi.end())
+      isdsi->second.clear();
+
+    _ms2si[signal] = 0;
+  }
 };
 
 #endif
