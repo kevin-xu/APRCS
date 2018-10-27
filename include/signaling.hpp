@@ -60,8 +60,8 @@ public:
   template <class S, class ... As>
   using Slot = typename _Slot<S, As...>::Type;
 
-  template <class S, class ... AsD>
-  using Slot2 = void (*)(S &signaling, AsD... argumentsAndData) noexcept;
+  template <class S, class ... Ts>
+  using Slot2 = void (*)(S &signaling, Ts... values) noexcept;
 
   using DetachData = void (*)(void *data) noexcept;
 
@@ -92,6 +92,8 @@ public:
       void *data,
       DetachData detachData = nullptr)
   {
+    static_assert(!std::is_const<S>::value, "");
+
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
     typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
@@ -100,31 +102,23 @@ public:
 
     static_assert(std::is_same<Slot2<S, AsD...>, typename _SIGNATURE::template SLOT<S>>::value, "");
 
-    if (slot == nullptr)
-      throw std::runtime_error("");
+    return static_cast<Signaling *>(self)->connect(signal, (Slot0)slot, data, detachData);
+  }
 
-    if (self->_ms2si.count(signal) == 0)
-      self->_ms2si[signal] = 0;
+  template <int signal, class S, class ... As>
+  static ConnectionId connect(S *self, Slot2<S, As...> slot)
+  {
+    static_assert(!std::is_const<S>::value, "");
 
-    auto isdsi = self->_ms2dsi.find(signal);
+    static_assert(std::is_base_of<Signaling, S>::value, "");
 
-    bool empty = isdsi == self->_ms2dsi.end() ? true : isdsi->second.empty();
+    typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
 
-    unsigned subconnectionId;
+    static_assert(IsInstanceOfSIGNATURE<_SIGNATURE>::value, "");
 
-    if (empty)
-      subconnectionId = self->_ms2si[signal];
-    else
-      subconnectionId = isdsi->second.front();
+    static_assert(std::is_same<Slot<S, As...>, typename _SIGNATURE::template SLOT<S>>::value, "");
 
-    self->_ms2msi2sddd[signal].emplace(subconnectionId, TSPVDD((Slot0)slot, data, detachData));
-
-    if (empty)
-      ++self->_ms2si[signal];
-    else
-      isdsi->second.pop_front();
-
-    return {signal, subconnectionId};
+    return static_cast<Signaling *>(self)->connect(signal, (Slot0)slot, nullptr, nullptr);
   }
 
   void disconnect(ConnectionId const &connectionId)
@@ -194,6 +188,8 @@ protected:
   template <int signal, class S, class ... As>
   static void emit(S *self, As... arguments) noexcept
   {
+    static_assert(!std::is_const<S>::value, "");
+
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
     typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
@@ -202,9 +198,11 @@ protected:
 
     typedef typename _SIGNATURE::template SLOT<S> _Slot;
 
-    auto ismsi2sddd = self->_ms2msi2sddd.find(signal);
+    Signaling *_self = static_cast<Signaling *>(self);
 
-    if (ismsi2sddd == self->_ms2msi2sddd.end())
+    auto ismsi2sddd = _self->_ms2msi2sddd.find(signal);
+
+    if (ismsi2sddd == _self->_ms2msi2sddd.end())
       return;
 
     MUTSPVDD const &msi2sddd = ismsi2sddd->second;
@@ -248,6 +246,35 @@ private:
   MIDU _ms2dsi;
 
   MIMUTSPVDD _ms2msi2sddd;
+
+  ConnectionId connect(int signal, Slot0 slot, void *data, DetachData detachData)
+  {
+    if (slot == nullptr)
+      throw std::runtime_error("");
+
+    if (_ms2si.count(signal) == 0)
+      _ms2si[signal] = 0;
+
+    auto isdsi = _ms2dsi.find(signal);
+
+    bool empty = isdsi == _ms2dsi.end() ? true : isdsi->second.empty();
+
+    unsigned subconnectionId;
+
+    if (empty)
+      subconnectionId = _ms2si[signal];
+    else
+      subconnectionId = isdsi->second.front();
+
+    _ms2msi2sddd[signal].emplace(subconnectionId, TSPVDD(slot, data, detachData));
+
+    if (empty)
+      ++_ms2si[signal];
+    else
+      isdsi->second.pop_front();
+
+    return {signal, subconnectionId};
+  }
 
   void disconnect(MIMUTSPVDD::value_type &smsi2sddd) noexcept
   {
