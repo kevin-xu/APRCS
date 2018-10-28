@@ -1,1 +1,2 @@
-
+# APRCS
+APRCS (AutoPtr-RefCounting-Signaling) is a complement to C++ ...
