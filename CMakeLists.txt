@@ -1,3 +1,6 @@
+#
+# Author: Kevin XU <kevin.xu.1982.02.06@gmail.com>
+#
 
 cmake_minimum_required(VERSION 3.0)
 
