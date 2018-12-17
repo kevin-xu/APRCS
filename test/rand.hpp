@@ -15,7 +15,7 @@ namespace Test {
 
 inline int rand(int max) noexcept
 {
-  return std::rand() % max;
+  return ::std::rand() % max;
 }
 
 }

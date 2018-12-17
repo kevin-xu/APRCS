@@ -37,9 +37,9 @@ public:
   }
 
 private:
-  std::vector<size_t> _types;
+  ::std::vector<::std::size_t> _types;
 
-  std::ostringstream _values;
+  ::std::ostringstream _values;
 
   void saveArguments0(void) noexcept {}
 
@@ -48,7 +48,7 @@ private:
   {
     _types.emplace_back(typeid(argument0).hash_code());
 
-    _values << argument0 << std::endl;
+    _values << argument0 << ::std::endl;
 
     saveArguments0(arguments...);
   }
