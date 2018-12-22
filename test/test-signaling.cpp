@@ -143,7 +143,7 @@ static void _detechDataPassingNonVoidFixed(void *data) noexcept
 }
 
 template <class ... As>
-void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, void *data) noexcept
+static void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, void *data) noexcept
 {
   try {
     ++_nPassingNonVoidFixed;
