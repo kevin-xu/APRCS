@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(APRCS CXX)
+project(APRCS LANGUAGES CXX)
 
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++11 -pedantic-errors -Wall")
 
