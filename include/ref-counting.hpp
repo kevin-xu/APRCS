@@ -60,11 +60,11 @@ public:
   }
 
   template <class T>
-  typename std::add_const<T>::type *ref(void) const noexcept
+  T const *ref(void) const noexcept
   {
     ref();
 
-    return static_cast<typename std::add_const<T>::type *>(this);
+    return static_cast<T const *>(this);
   }
 
   void deref(void) const
