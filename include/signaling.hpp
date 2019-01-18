@@ -143,9 +143,9 @@ public:
 
     TSPVDD const &sddd = isisddd->second;
 
-    void *data = std::get<1>(sddd);
+    void *data = std::get<1UL>(sddd);
 
-    DetachData detachData = std::get<2>(sddd);
+    DetachData detachData = std::get<2UL>(sddd);
 
     if (detachData != nullptr)
       (*detachData)(data);
@@ -213,9 +213,9 @@ protected:
     for (auto i = msi2sddd.cbegin(), end = msi2sddd.cend(); i != end; ++i) {
       TSPVDD const &sddd = i->second;
 
-      _Slot slot = (_Slot)std::get<0>(sddd);
+      _Slot slot = (_Slot)std::get<0UL>(sddd);
 
-      void *data = std::get<1>(sddd);
+      void *data = std::get<1UL>(sddd);
 
       (*slot)(*self, arguments..., data);
     }
@@ -252,8 +252,8 @@ private:
     if (slot == nullptr)
       throw std::runtime_error("");
 
-    if (_ms2si.count(signal) == 0)
-      _ms2si[signal] = 0;
+    if (_ms2si.count(signal) == 0UL)
+      _ms2si[signal] = 0U;
 
     auto isdsi = _ms2dsi.find(signal);
 
@@ -288,9 +288,9 @@ private:
     for (auto i = msi2sddd.cbegin(), end = msi2sddd.cend(); i != end; ++i) {
       TSPVDD const &sddd = i->second;
 
-      void *data = std::get<1>(sddd);
+      void *data = std::get<1UL>(sddd);
 
-      DetachData detachData = std::get<2>(sddd);
+      DetachData detachData = std::get<2UL>(sddd);
 
       if (detachData != nullptr)
         (*detachData)(data);
@@ -303,7 +303,7 @@ private:
     if (isdsi != _ms2dsi.end())
       isdsi->second.clear();
 
-    _ms2si[signal] = 0;
+    _ms2si[signal] = 0U;
   }
 };
 

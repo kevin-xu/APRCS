@@ -27,7 +27,7 @@ using namespace Test;
 
 static Arguments _constructorArguments;
 
-static unsigned _nConstructings = 0;
+static unsigned _nConstructings = 0U;
 
 static void *_constructed = nullptr;
 
@@ -39,7 +39,7 @@ static void _recoverState(void)
 {
   _constructorArguments();
 
-  _nConstructings = 0;
+  _nConstructings = 0U;
 
   _constructed = nullptr;
 
@@ -92,7 +92,7 @@ int main(int argc, char const *argv[])
   {
     AutoPtr<_TestRefCountingObject> trco;
 
-    assert(_nConstructings == 0);
+    assert(_nConstructings == 0U);
 
     assert(trco == nullptr);
   }
@@ -100,7 +100,7 @@ int main(int argc, char const *argv[])
   {
     AutoPtr<_TestRefCountingObject> trco = nullptr;
 
-    assert(_nConstructings == 0);
+    assert(_nConstructings == 0U);
 
     assert(trco == nullptr);
   }
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[])
 
       AutoPtr<_TestRefCountingObject> _trco = trco;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -135,7 +135,7 @@ int main(int argc, char const *argv[])
 
       AutoPtr<_TestRefCountingObject> __trco = _trco;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -159,7 +159,7 @@ int main(int argc, char const *argv[])
 
       AutoPtr<_TestRefCountingObject> trco = _trcod;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -183,7 +183,7 @@ int main(int argc, char const *argv[])
 
       AutoPtr<_TestRefCountingObject> __trco = move(_trco);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -207,7 +207,7 @@ int main(int argc, char const *argv[])
 
       AutoPtr<_TestRefCountingObject> trco = move(_trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -242,7 +242,7 @@ int main(int argc, char const *argv[])
 
     trco = nullptr;
 
-    assert(_nConstructings == 0);
+    assert(_nConstructings == 0U);
 
     assert(trco == nullptr);
 
@@ -254,7 +254,7 @@ int main(int argc, char const *argv[])
 
     __trco = nullptr;
 
-    assert(_nConstructings == 1);
+    assert(_nConstructings == 1U);
 
     assert(_destructed);
 
@@ -271,7 +271,7 @@ int main(int argc, char const *argv[])
 
       _trco = trco;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -293,7 +293,7 @@ int main(int argc, char const *argv[])
 
       __trco = trco;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -319,7 +319,7 @@ int main(int argc, char const *argv[])
 
       ___trco = trco2;
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(_destructed == trco);
 
@@ -345,7 +345,7 @@ int main(int argc, char const *argv[])
 
       trco1 = trco2;
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       assert(trco1 == nullptr);
 
@@ -359,7 +359,7 @@ int main(int argc, char const *argv[])
 
       trco1 = trco2;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(_destructed);
 
@@ -375,7 +375,7 @@ int main(int argc, char const *argv[])
 
       trco1 = trco2;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -405,7 +405,7 @@ int main(int argc, char const *argv[])
 
       trco1 = trco2;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -439,7 +439,7 @@ int main(int argc, char const *argv[])
 
       trco1 = trco2;
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(_destructed == _trco1);
 
@@ -471,7 +471,7 @@ int main(int argc, char const *argv[])
 
       trco = trcod;
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       assert(trco == nullptr);
 
@@ -485,7 +485,7 @@ int main(int argc, char const *argv[])
 
       trco = trcod;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(_destructed);
 
@@ -501,7 +501,7 @@ int main(int argc, char const *argv[])
 
       trco = trcod;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -531,7 +531,7 @@ int main(int argc, char const *argv[])
 
       trco = trcod;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -565,7 +565,7 @@ int main(int argc, char const *argv[])
 
       trco = trcod;
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(_destructed == _trco);
 
@@ -597,7 +597,7 @@ int main(int argc, char const *argv[])
 
       trco1 = move(trco2);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       assert(trco1 == nullptr);
 
@@ -611,7 +611,7 @@ int main(int argc, char const *argv[])
 
       trco1 = move(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(_destructed);
 
@@ -627,7 +627,7 @@ int main(int argc, char const *argv[])
 
       trco1 = move(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -653,7 +653,7 @@ int main(int argc, char const *argv[])
 
       trco1 = move(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -687,7 +687,7 @@ int main(int argc, char const *argv[])
 
       trco1 = move(trco2);
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(_destructed == _trco1);
 
@@ -715,7 +715,7 @@ int main(int argc, char const *argv[])
 
       trco = move(trcod);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       assert(trco == nullptr);
 
@@ -729,7 +729,7 @@ int main(int argc, char const *argv[])
 
       trco = move(trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(_destructed);
 
@@ -745,7 +745,7 @@ int main(int argc, char const *argv[])
 
       trco = move(trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -771,7 +771,7 @@ int main(int argc, char const *argv[])
 
       trco = move(trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -805,7 +805,7 @@ int main(int argc, char const *argv[])
 
       trco = move(trcod);
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(_destructed == _trco);
 
@@ -853,7 +853,7 @@ int main(int argc, char const *argv[])
 
       _trco->doo();
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -875,7 +875,7 @@ int main(int argc, char const *argv[])
 
       _TestRefCountingObject &__trco = *_trco;
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -902,13 +902,13 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObject *)trco == nullptr);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       trco = nullptr;
 
       assert(trco == nullptr);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObject *_trco = new _TestRefCountingObject();
 
@@ -916,7 +916,7 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObject *)trco == _trco);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -936,7 +936,7 @@ int main(int argc, char const *argv[])
 
       assert(trco == _trco);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -958,13 +958,13 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObject *)trcod == nullptr);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       trcod = nullptr;
 
       assert(trcod == (_TestRefCountingObject *)nullptr);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObjectDerived *_trcod = new _TestRefCountingObjectDerived();
 
@@ -972,7 +972,7 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObject *)trcod == _trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -992,7 +992,7 @@ int main(int argc, char const *argv[])
 
       assert(trcod == (_TestRefCountingObject *)_trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1014,7 +1014,7 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObjectDerived *)trco == nullptr);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObjectDerived *trcod = new _TestRefCountingObjectDerived();
 
@@ -1022,7 +1022,7 @@ int main(int argc, char const *argv[])
 
       assert((_TestRefCountingObjectDerived *)trco == trcod);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1044,13 +1044,13 @@ int main(int argc, char const *argv[])
 
       assert(!(bool)trco);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       trco = nullptr;
 
       assert(!trco);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObject *_trco = new _TestRefCountingObject();
 
@@ -1060,7 +1060,7 @@ int main(int argc, char const *argv[])
 
       assert((bool)trco);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1078,7 +1078,7 @@ int main(int argc, char const *argv[])
 
       assert(trco);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1098,7 +1098,7 @@ int main(int argc, char const *argv[])
 
       trco1.swap(trco2);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       assert(trco1 == nullptr);
 
@@ -1110,7 +1110,7 @@ int main(int argc, char const *argv[])
 
       trco1.swap(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1134,7 +1134,7 @@ int main(int argc, char const *argv[])
 
       trco1.swap(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1160,7 +1160,7 @@ int main(int argc, char const *argv[])
 
       trco1.swap(trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1192,7 +1192,7 @@ int main(int argc, char const *argv[])
 
       trco1.swap(trco2);
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
@@ -1228,7 +1228,7 @@ int main(int argc, char const *argv[])
 
       assert(trco1 == trco2);
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
 
@@ -1238,7 +1238,7 @@ int main(int argc, char const *argv[])
 
       assert(!(trco1 == trco2));
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1264,7 +1264,7 @@ int main(int argc, char const *argv[])
 
       assert(!(trco1 == trco2));
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1292,7 +1292,7 @@ int main(int argc, char const *argv[])
 
       assert(trco1 == trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1320,7 +1320,7 @@ int main(int argc, char const *argv[])
 
       assert(!(trco1 == trco2));
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
@@ -1344,7 +1344,7 @@ int main(int argc, char const *argv[])
 
       assert(!(trco1 != trco2));
 
-      assert(_nConstructings == 0);
+      assert(_nConstructings == 0U);
 
       _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
 
@@ -1354,7 +1354,7 @@ int main(int argc, char const *argv[])
 
       assert(trco1 != trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1380,7 +1380,7 @@ int main(int argc, char const *argv[])
 
       assert(trco1 != trco2);
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1408,7 +1408,7 @@ int main(int argc, char const *argv[])
 
       assert(!(trco1 != trco2));
 
-      assert(_nConstructings == 1);
+      assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
@@ -1436,7 +1436,7 @@ int main(int argc, char const *argv[])
 
       assert(trco1 != trco2);
 
-      assert(_nConstructings == 2);
+      assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
@@ -1464,7 +1464,7 @@ int main(int argc, char const *argv[])
   {
     NEW<_TestRefCountingObject>();
 
-    assert(_nConstructings == 1);
+    assert(_nConstructings == 1U);
 
     assert(_constructed == _destructed);
 
@@ -1484,7 +1484,7 @@ int main(int argc, char const *argv[])
 
     NEW<_TestRefCountingObject>(_NEW__ARGUMENTS);
 
-    assert(_nConstructings == 1);
+    assert(_nConstructings == 1U);
 
     assert(_constructed == _destructed);
 

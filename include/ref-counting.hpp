@@ -69,12 +69,12 @@ public:
 
   void deref(void) const
   {
-    if (--_count == 0)
+    if (--_count == 0U)
       delete this;
   }
 
 protected:
-  constexpr RefCounting(void) noexcept: _count(1) {}
+  constexpr RefCounting(void) noexcept: _count(1U) {}
 
   virtual ~RefCounting() = default;
 

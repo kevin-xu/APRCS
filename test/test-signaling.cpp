@@ -60,17 +60,17 @@ struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PAS
   typedef Signaling::SIGNATURE<_PASS_NON_VOID_FIXED__SIGNATURE> SIGNATURE;
 };
 
-static unsigned _nPassingVoid = 0;
+static unsigned _nPassingVoid = 0U;
 
 static vector<_TestSignalingObject *> _tsosPassingVoid;
 
 static vector<void *> _vdataPassingVoid;
 
-static unsigned _nDetachingDataPassingVoid = 0;
+static unsigned _nDetachingDataPassingVoid = 0U;
 
 static vector<void *> _vdetachedDataPassingVoid;
 
-static unsigned _nPassingNonVoidFixed = 0;
+static unsigned _nPassingNonVoidFixed = 0U;
 
 static vector<_TestSignalingObject *> _tsosPassingNonVoidFixed;
 
@@ -78,23 +78,23 @@ static vector<Arguments> _argumentssPassingNonVoidFixed;
 
 static vector<void *> _vdataPassingNonVoidFixed;
 
-static unsigned _nDetachingDataPassingNonVoidFixed = 0;
+static unsigned _nDetachingDataPassingNonVoidFixed = 0U;
 
 static vector<void *> _vdetachedDataPassingNonVoidFixed;
 
 static void _recoverState(void) noexcept
 {
-  _nPassingVoid = 0;
+  _nPassingVoid = 0U;
 
   _tsosPassingVoid.clear();
 
   _vdataPassingVoid.clear();
 
-  _nDetachingDataPassingVoid = 0;
+  _nDetachingDataPassingVoid = 0U;
 
   _vdetachedDataPassingVoid.clear();
 
-  _nPassingNonVoidFixed = 0;
+  _nPassingNonVoidFixed = 0U;
 
   _tsosPassingNonVoidFixed.clear();
 
@@ -102,7 +102,7 @@ static void _recoverState(void) noexcept
 
   _vdataPassingNonVoidFixed.clear();
 
-  _nDetachingDataPassingNonVoidFixed = 0;
+  _nDetachingDataPassingNonVoidFixed = 0U;
 
   _vdetachedDataPassingNonVoidFixed.clear();
 }
@@ -168,7 +168,7 @@ int main(int argc, char const *argv[])
 
   vector<Signaling::ConnectionId> cis(n);
 
-  for (unsigned i = 0; i < n; ++i)
+  for (unsigned i = 0U; i < n; ++i)
     cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
         &tso,
         &_handlePassVoid,
@@ -189,7 +189,7 @@ int main(int argc, char const *argv[])
 
   set<unsigned> si;
 
-  for (unsigned i = 0, end = rand(n); i < end; ++i)
+  for (unsigned i = 0U, end = rand(n); i < end; ++i)
     si.emplace(rand(n));
 
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
@@ -227,7 +227,7 @@ int main(int argc, char const *argv[])
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
 
-  assert(_nPassingVoid == 0);
+  assert(_nPassingVoid == 0U);
 
   _recoverState();
 
@@ -237,7 +237,7 @@ int main(int argc, char const *argv[])
 
   cis.resize(n);
 
-  for (unsigned i = 0; i < n; ++i)
+  for (unsigned i = 0U; i < n; ++i)
     cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
         &tso,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
@@ -267,7 +267,7 @@ int main(int argc, char const *argv[])
 
   si.clear();
 
-  for (unsigned i = 0, end = rand(n); i < end; ++i)
+  for (unsigned i = 0U, end = rand(n); i < end; ++i)
     si.emplace(rand(n));
 
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
@@ -316,7 +316,7 @@ int main(int argc, char const *argv[])
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
-  assert(_nPassingNonVoidFixed == 0);
+  assert(_nPassingNonVoidFixed == 0U);
 
   _recoverState();
 
@@ -324,7 +324,7 @@ int main(int argc, char const *argv[])
 
   vector<Signaling::ConnectionId> cis1(n1);
 
-  for (unsigned i = 0; i < n1; ++i)
+  for (unsigned i = 0U; i < n1; ++i)
     cis1[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
         &tso,
         &_handlePassVoid,
@@ -335,7 +335,7 @@ int main(int argc, char const *argv[])
 
   vector<Signaling::ConnectionId> cis2(n2);
 
-  for (unsigned i = 0; i < n2; ++i)
+  for (unsigned i = 0U; i < n2; ++i)
     cis2[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
         &tso,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
@@ -394,9 +394,9 @@ int main(int argc, char const *argv[])
 
   tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
-  assert(_nPassingVoid == 0);
+  assert(_nPassingVoid == 0U);
 
-  assert(_nPassingNonVoidFixed == 0);
+  assert(_nPassingNonVoidFixed == 0U);
 
   delete data;
 
