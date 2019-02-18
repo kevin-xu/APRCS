@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(APRCS LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++11 -pedantic-errors -Wall")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++17 -pedantic-errors -Wall")
 
 include_directories("include")
 
