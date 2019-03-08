@@ -48,9 +48,9 @@ static void _recoverState(void)
   _done = false;
 }
 
-class _TestRefCountingObject: public RefCounting {
+class _TestRefCounting: public RefCounting {
 public:
-  _TestRefCountingObject(void) noexcept
+  _TestRefCounting(void) noexcept
   {
     ++_nConstructings;
 
@@ -58,7 +58,7 @@ public:
   }
 
   template <class ... Ts>
-  _TestRefCountingObject(Ts... arguments)
+  _TestRefCounting(Ts... arguments)
   {
     _constructorArguments(arguments...);
 
@@ -73,51 +73,51 @@ public:
   }
 
 protected:
-  ~_TestRefCountingObject() noexcept
+  ~_TestRefCounting() noexcept
   {
     _destructed = this;
   }
 };
 
-class _TestRefCountingObjectDerived: public _TestRefCountingObject {
+class _TestRefCountingDerived: public _TestRefCounting {
 public:
-  _TestRefCountingObjectDerived(void) = default;
+  _TestRefCountingDerived(void) = default;
 
 protected:
-  ~_TestRefCountingObjectDerived() = default;
+  ~_TestRefCountingDerived() = default;
 };
 
 int main(int argc, char const *argv[])
 {
   {
-    AutoPtr<_TestRefCountingObject> trco;
+    AutoPtr<_TestRefCounting> trc;
 
     assert(_nConstructings == 0U);
 
-    assert(trco == nullptr);
+    assert(trc == nullptr);
   }
 
   {
-    AutoPtr<_TestRefCountingObject> trco = nullptr;
+    AutoPtr<_TestRefCounting> trc = nullptr;
 
     assert(_nConstructings == 0U);
 
-    assert(trco == nullptr);
+    assert(trc == nullptr);
   }
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(_trco == trco);
+      assert(_trc == trc);
 
-      trco->deref();
+      trc->deref();
 
       assert(!_destructed);
     }
@@ -129,19 +129,19 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
-      AutoPtr<_TestRefCountingObject> __trco = _trco;
+      AutoPtr<_TestRefCounting> __trc = _trc;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(__trco == trco);
+      assert(__trc == trc);
 
-      trco->deref();
+      trc->deref();
 
       assert(!_destructed);
     }
@@ -153,19 +153,19 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObjectDerived *trcod = new _TestRefCountingObjectDerived();
+      _TestRefCountingDerived *trcd = new _TestRefCountingDerived();
 
-      AutoPtr<_TestRefCountingObjectDerived> _trcod = trcod;
+      AutoPtr<_TestRefCountingDerived> _trcd = trcd;
 
-      AutoPtr<_TestRefCountingObject> trco = _trcod;
+      AutoPtr<_TestRefCounting> trc = _trcd;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == trcod);
+      assert(trc == trcd);
 
-      trcod->deref();
+      trcd->deref();
 
       assert(!_destructed);
     }
@@ -177,19 +177,19 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
-      AutoPtr<_TestRefCountingObject> __trco = move(_trco);
+      AutoPtr<_TestRefCounting> __trc = move(_trc);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(__trco == trco);
+      assert(__trc == trc);
 
-      trco->deref();
+      trc->deref();
 
       assert(!_destructed);
     }
@@ -201,19 +201,19 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObjectDerived *trcod = new _TestRefCountingObjectDerived();
+      _TestRefCountingDerived *trcd = new _TestRefCountingDerived();
 
-      AutoPtr<_TestRefCountingObjectDerived> _trcod = trcod;
+      AutoPtr<_TestRefCountingDerived> _trcd = trcd;
 
-      AutoPtr<_TestRefCountingObject> trco = move(_trcod);
+      AutoPtr<_TestRefCounting> trc = move(_trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == trcod);
+      assert(trc == trcd);
 
-      trcod->deref();
+      trcd->deref();
 
       assert(!_destructed);
     }
@@ -225,11 +225,11 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
-      trco->deref();
+      trc->deref();
     }
 
     assert(_destructed);
@@ -238,100 +238,100 @@ int main(int argc, char const *argv[])
   }
 
   {
-    AutoPtr<_TestRefCountingObject> trco;
+    AutoPtr<_TestRefCounting> trc;
 
-    trco = nullptr;
+    trc = nullptr;
 
     assert(_nConstructings == 0U);
 
-    assert(trco == nullptr);
+    assert(trc == nullptr);
 
-    _TestRefCountingObject *_trco = new _TestRefCountingObject();
+    _TestRefCounting *_trc = new _TestRefCounting();
 
-    AutoPtr<_TestRefCountingObject> __trco = _trco;
+    AutoPtr<_TestRefCounting> __trc = _trc;
 
-    _trco->deref();
+    _trc->deref();
 
-    __trco = nullptr;
+    __trc = nullptr;
 
     assert(_nConstructings == 1U);
 
     assert(_destructed);
 
-    assert(__trco == nullptr);
+    assert(__trc == nullptr);
 
     _recoverState();
   }
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco;
+      AutoPtr<_TestRefCounting> _trc;
 
-      _trco = trco;
-
-      assert(_nConstructings == 1U);
-
-      assert(!_destructed);
-
-      assert(_trco == trco);
-
-      trco->deref();
-
-      assert(!_destructed);
-
-      _trco = nullptr;
-
-      assert(_destructed);
-
-      _recoverState();
-
-      trco = new _TestRefCountingObject();
-
-      AutoPtr<_TestRefCountingObject> __trco = trco;
-
-      __trco = trco;
+      _trc = trc;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(__trco == trco);
+      assert(_trc == trc);
 
-      trco->deref();
+      trc->deref();
 
       assert(!_destructed);
 
-      __trco = nullptr;
+      _trc = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      trco = new _TestRefCountingObject();
+      trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> ___trco = trco;
+      AutoPtr<_TestRefCounting> __trc = trc;
 
-      trco->deref();
+      __trc = trc;
 
-      _TestRefCountingObject *trco2 = new _TestRefCountingObject();
+      assert(_nConstructings == 1U);
 
-      ___trco = trco2;
+      assert(!_destructed);
+
+      assert(__trc == trc);
+
+      trc->deref();
+
+      assert(!_destructed);
+
+      __trc = nullptr;
+
+      assert(_destructed);
+
+      _recoverState();
+
+      trc = new _TestRefCounting();
+
+      AutoPtr<_TestRefCounting> ___trc = trc;
+
+      trc->deref();
+
+      _TestRefCounting *trc2 = new _TestRefCounting();
+
+      ___trc = trc2;
 
       assert(_nConstructings == 2U);
 
-      assert(_destructed == trco);
+      assert(_destructed == trc);
 
-      assert(___trco == trco2);
+      assert(___trc == trc2);
 
-      trco2->deref();
+      trc2->deref();
 
-      assert(_destructed != trco2);
+      assert(_destructed != trc2);
 
-      ___trco = nullptr;
+      ___trc = nullptr;
 
-      assert(_destructed == trco2);
+      assert(_destructed == trc2);
     }
 
     _recoverState();
@@ -339,125 +339,125 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco1;
+      AutoPtr<_TestRefCounting> trc1;
 
-      AutoPtr<_TestRefCountingObject> trco2;
+      AutoPtr<_TestRefCounting> trc2;
 
-      trco1 = trco2;
+      trc1 = trc2;
 
       assert(_nConstructings == 0U);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == nullptr);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
-      _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
+      _TestRefCounting *_trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      _trco1->deref();
+      _trc1->deref();
 
-      trco1 = trco2;
+      trc1 = trc2;
 
       assert(_nConstructings == 1U);
 
       assert(_destructed);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == nullptr);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
       _recoverState();
 
-      _TestRefCountingObject *_trco2 = new _TestRefCountingObject();
+      _TestRefCounting *_trc2 = new _TestRefCounting();
 
-      trco2 = _trco2;
+      trc2 = _trc2;
 
-      trco1 = trco2;
+      trc1 = trc2;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == _trc2);
 
-      assert(trco2 == _trco2);
+      assert(trc2 == _trc2);
 
-      _trco2->deref();
-
-      assert(!_destructed);
-
-      trco1 = nullptr;
+      _trc2->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      trco1 = trco;
+      trc1 = trc;
 
-      trco2 = trco;
+      trc2 = trc;
 
-      trco1 = trco2;
+      trc1 = trc2;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == trco);
+      assert(trc1 == trc);
 
-      assert(trco2 == trco);
+      assert(trc2 == trc);
 
-      trco->deref();
-
-      assert(!_destructed);
-
-      trco1 = nullptr;
+      trc->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco1 = new _TestRefCountingObject();
+      _trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      _trco1->deref();
+      _trc1->deref();
 
-      _trco2 = new _TestRefCountingObject();
+      _trc2 = new _TestRefCounting();
 
-      trco2 = _trco2;
+      trc2 = _trc2;
 
-      trco1 = trco2;
+      trc1 = trc2;
 
       assert(_nConstructings == 2U);
 
-      assert(_destructed == _trco1);
+      assert(_destructed == _trc1);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == _trc2);
 
-      assert(trco2 == _trco2);
+      assert(trc2 == _trc2);
 
-      _trco2->deref();
+      _trc2->deref();
 
-      assert(_destructed != _trco2);
+      assert(_destructed != _trc2);
 
-      trco1 = nullptr;
+      trc1 = nullptr;
 
-      assert(_destructed != _trco2);
+      assert(_destructed != _trc2);
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
-      assert(_destructed == _trco2);
+      assert(_destructed == _trc2);
     }
 
     _recoverState();
@@ -465,125 +465,125 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco;
+      AutoPtr<_TestRefCounting> trc;
 
-      AutoPtr<_TestRefCountingObjectDerived> trcod;
+      AutoPtr<_TestRefCountingDerived> trcd;
 
-      trco = trcod;
+      trc = trcd;
 
       assert(_nConstructings == 0U);
 
-      assert(trco == nullptr);
+      assert(trc == nullptr);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
-      _TestRefCountingObject *_trco = new _TestRefCountingObject();
+      _TestRefCounting *_trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      _trco->deref();
+      _trc->deref();
 
-      trco = trcod;
+      trc = trcd;
 
       assert(_nConstructings == 1U);
 
       assert(_destructed);
 
-      assert(trco == nullptr);
+      assert(trc == nullptr);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
       _recoverState();
 
-      _TestRefCountingObjectDerived *_trcod = new _TestRefCountingObjectDerived();
+      _TestRefCountingDerived *_trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = trcod;
+      trc = trcd;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      assert(trcod == _trcod);
+      assert(trcd == _trcd);
 
-      _trcod->deref();
-
-      assert(!_destructed);
-
-      trco = nullptr;
+      _trcd->deref();
 
       assert(!_destructed);
 
-      trcod = nullptr;
+      trc = nullptr;
+
+      assert(!_destructed);
+
+      trcd = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trcod = new _TestRefCountingObjectDerived();
+      _trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = _trcod;
+      trc = _trcd;
 
-      trco = trcod;
+      trc = trcd;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      assert(trcod == _trcod);
+      assert(trcd == _trcd);
 
-      _trcod->deref();
-
-      assert(!_destructed);
-
-      trco = nullptr;
+      _trcd->deref();
 
       assert(!_destructed);
 
-      trcod = nullptr;
+      trc = nullptr;
+
+      assert(!_destructed);
+
+      trcd = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco = new _TestRefCountingObject();
+      _trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      _trco->deref();
+      _trc->deref();
 
-      _trcod = new _TestRefCountingObjectDerived();
+      _trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = trcod;
+      trc = trcd;
 
       assert(_nConstructings == 2U);
 
-      assert(_destructed == _trco);
+      assert(_destructed == _trc);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      assert(trcod == _trcod);
+      assert(trcd == _trcd);
 
-      _trcod->deref();
+      _trcd->deref();
 
-      assert(_destructed != _trcod);
+      assert(_destructed != _trcd);
 
-      trco = nullptr;
+      trc = nullptr;
 
-      assert(_destructed != _trcod);
+      assert(_destructed != _trcd);
 
-      trcod = nullptr;
+      trcd = nullptr;
 
-      assert(_destructed == _trcod);
+      assert(_destructed == _trcd);
     }
 
     _recoverState();
@@ -591,117 +591,117 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco1;
+      AutoPtr<_TestRefCounting> trc1;
 
-      AutoPtr<_TestRefCountingObject> trco2;
+      AutoPtr<_TestRefCounting> trc2;
 
-      trco1 = move(trco2);
+      trc1 = move(trc2);
 
       assert(_nConstructings == 0U);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == nullptr);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
-      _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
+      _TestRefCounting *_trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      _trco1->deref();
+      _trc1->deref();
 
-      trco1 = move(trco2);
+      trc1 = move(trc2);
 
       assert(_nConstructings == 1U);
 
       assert(_destructed);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == nullptr);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
       _recoverState();
 
-      _TestRefCountingObject *_trco2 = new _TestRefCountingObject();
+      _TestRefCounting *_trc2 = new _TestRefCounting();
 
-      trco2 = _trco2;
+      trc2 = _trc2;
 
-      trco1 = move(trco2);
+      trc1 = move(trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == _trc2);
 
-      _trco2->deref();
+      _trc2->deref();
 
       assert(!_destructed);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
-      trco1 = nullptr;
+      trc1 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      trco1 = trco;
+      trc1 = trc;
 
-      trco2 = trco;
+      trc2 = trc;
 
-      trco1 = move(trco2);
+      trc1 = move(trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == trco);
+      assert(trc1 == trc);
 
-      assert(trco2 == trco);
+      assert(trc2 == trc);
 
-      trco->deref();
-
-      assert(!_destructed);
-
-      trco1 = nullptr;
+      trc->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco1 = new _TestRefCountingObject();
+      _trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      _trco1->deref();
+      _trc1->deref();
 
-      _trco2 = new _TestRefCountingObject();
+      _trc2 = new _TestRefCounting();
 
-      trco2 = _trco2;
+      trc2 = _trc2;
 
-      trco1 = move(trco2);
+      trc1 = move(trc2);
 
       assert(_nConstructings == 2U);
 
-      assert(_destructed == _trco1);
+      assert(_destructed == _trc1);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == _trc2);
 
-      _trco2->deref();
+      _trc2->deref();
 
-      assert(_destructed != _trco2);
+      assert(_destructed != _trc2);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
-      trco1 = nullptr;
+      trc1 = nullptr;
 
-      assert(_destructed == _trco2);
+      assert(_destructed == _trc2);
     }
 
     _recoverState();
@@ -709,117 +709,117 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco;
+      AutoPtr<_TestRefCounting> trc;
 
-      AutoPtr<_TestRefCountingObjectDerived> trcod;
+      AutoPtr<_TestRefCountingDerived> trcd;
 
-      trco = move(trcod);
+      trc = move(trcd);
 
       assert(_nConstructings == 0U);
 
-      assert(trco == nullptr);
+      assert(trc == nullptr);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
-      _TestRefCountingObject *_trco = new _TestRefCountingObject();
+      _TestRefCounting *_trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      _trco->deref();
+      _trc->deref();
 
-      trco = move(trcod);
+      trc = move(trcd);
 
       assert(_nConstructings == 1U);
 
       assert(_destructed);
 
-      assert(trco == nullptr);
+      assert(trc == nullptr);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
       _recoverState();
 
-      _TestRefCountingObjectDerived *_trcod = new _TestRefCountingObjectDerived();
+      _TestRefCountingDerived *_trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = move(trcod);
+      trc = move(trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      _trcod->deref();
+      _trcd->deref();
 
       assert(!_destructed);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trcod = new _TestRefCountingObjectDerived();
+      _trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = _trcod;
+      trc = _trcd;
 
-      trco = move(trcod);
+      trc = move(trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      assert(trcod == _trcod);
+      assert(trcd == _trcd);
 
-      _trcod->deref();
-
-      assert(!_destructed);
-
-      trco = nullptr;
+      _trcd->deref();
 
       assert(!_destructed);
 
-      trcod = nullptr;
+      trc = nullptr;
+
+      assert(!_destructed);
+
+      trcd = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco = new _TestRefCountingObject();
+      _trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      _trco->deref();
+      _trc->deref();
 
-      _trcod = new _TestRefCountingObjectDerived();
+      _trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      trco = move(trcod);
+      trc = move(trcd);
 
       assert(_nConstructings == 2U);
 
-      assert(_destructed == _trco);
+      assert(_destructed == _trc);
 
-      assert(trco == _trcod);
+      assert(trc == _trcd);
 
-      _trcod->deref();
+      _trcd->deref();
 
-      assert(_destructed != _trcod);
+      assert(_destructed != _trcd);
 
-      assert(trcod == nullptr);
+      assert(trcd == nullptr);
 
-      trco = nullptr;
+      trc = nullptr;
 
-      assert(_destructed == _trcod);
+      assert(_destructed == _trcd);
     }
 
     _recoverState();
@@ -845,13 +845,13 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
-      trco->deref();
+      trc->deref();
 
-      _trco->doo();
+      _trc->doo();
 
       assert(_nConstructings == 1U);
 
@@ -859,7 +859,7 @@ int main(int argc, char const *argv[])
 
       assert(_done == true);
 
-      _trco = nullptr;
+      _trc = nullptr;
 
       assert(_destructed);
     }
@@ -869,23 +869,23 @@ int main(int argc, char const *argv[])
 
   {
     {
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      AutoPtr<_TestRefCountingObject> _trco = trco;
+      AutoPtr<_TestRefCounting> _trc = trc;
 
-      _TestRefCountingObject &__trco = *_trco;
+      _TestRefCounting &__trc = *_trc;
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(&__trco == trco);
+      assert(&__trc == trc);
 
-      trco->deref();
+      trc->deref();
 
       assert(!_destructed);
 
-      _trco = nullptr;
+      _trc = nullptr;
 
       assert(_destructed);
     }
@@ -898,53 +898,53 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco;
+      AutoPtr<_TestRefCounting> trc;
 
-      assert((_TestRefCountingObject *)trco == nullptr);
-
-      assert(_nConstructings == 0U);
-
-      trco = nullptr;
-
-      assert(trco == nullptr);
+      assert((_TestRefCounting *)trc == nullptr);
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObject *_trco = new _TestRefCountingObject();
+      trc = nullptr;
 
-      trco = _trco;
+      assert(trc == nullptr);
 
-      assert((_TestRefCountingObject *)trco == _trco);
+      assert(_nConstructings == 0U);
+
+      _TestRefCounting *_trc = new _TestRefCounting();
+
+      trc = _trc;
+
+      assert((_TestRefCounting *)trc == _trc);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      _trco->deref();
+      _trc->deref();
 
       assert(!_destructed);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco = new _TestRefCountingObject();
+      _trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      assert(trco == _trco);
+      assert(trc == _trc);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      _trco->deref();
+      _trc->deref();
 
       assert(!_destructed);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
     }
@@ -954,53 +954,53 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObjectDerived> trcod;
+      AutoPtr<_TestRefCountingDerived> trcd;
 
-      assert((_TestRefCountingObject *)trcod == nullptr);
-
-      assert(_nConstructings == 0U);
-
-      trcod = nullptr;
-
-      assert(trcod == (_TestRefCountingObject *)nullptr);
+      assert((_TestRefCounting *)trcd == nullptr);
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObjectDerived *_trcod = new _TestRefCountingObjectDerived();
+      trcd = nullptr;
 
-      trcod = _trcod;
+      assert(trcd == (_TestRefCounting *)nullptr);
 
-      assert((_TestRefCountingObject *)trcod == _trcod);
+      assert(_nConstructings == 0U);
+
+      _TestRefCountingDerived *_trcd = new _TestRefCountingDerived();
+
+      trcd = _trcd;
+
+      assert((_TestRefCounting *)trcd == _trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      _trcod->deref();
+      _trcd->deref();
 
       assert(!_destructed);
 
-      trcod = nullptr;
+      trcd = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trcod = new _TestRefCountingObjectDerived();
+      _trcd = new _TestRefCountingDerived();
 
-      trcod = _trcod;
+      trcd = _trcd;
 
-      assert(trcod == (_TestRefCountingObject *)_trcod);
+      assert(trcd == (_TestRefCounting *)_trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      _trcod->deref();
+      _trcd->deref();
 
       assert(!_destructed);
 
-      trcod = nullptr;
+      trcd = nullptr;
 
       assert(_destructed);
     }
@@ -1010,27 +1010,27 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco;
+      AutoPtr<_TestRefCounting> trc;
 
-      assert((_TestRefCountingObjectDerived *)trco == nullptr);
+      assert((_TestRefCountingDerived *)trc == nullptr);
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObjectDerived *trcod = new _TestRefCountingObjectDerived();
+      _TestRefCountingDerived *trcd = new _TestRefCountingDerived();
 
-      trco = trcod;
+      trc = trcd;
 
-      assert((_TestRefCountingObjectDerived *)trco == trcod);
+      assert((_TestRefCountingDerived *)trc == trcd);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      trcod->deref();
+      trcd->deref();
 
       assert(!_destructed);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
     }
@@ -1040,49 +1040,49 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco;
+      AutoPtr<_TestRefCounting> trc;
 
-      assert(!(bool)trco);
-
-      assert(_nConstructings == 0U);
-
-      trco = nullptr;
-
-      assert(!trco);
+      assert(!(bool)trc);
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObject *_trco = new _TestRefCountingObject();
+      trc = nullptr;
 
-      trco = _trco;
+      assert(!trc);
 
-      _trco->deref();
+      assert(_nConstructings == 0U);
 
-      assert((bool)trco);
+      _TestRefCounting *_trc = new _TestRefCounting();
+
+      trc = _trc;
+
+      _trc->deref();
+
+      assert((bool)trc);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco = new _TestRefCountingObject();
+      _trc = new _TestRefCounting();
 
-      trco = _trco;
+      trc = _trc;
 
-      _trco->deref();
+      _trc->deref();
 
-      assert(trco);
+      assert(trc);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      trco = nullptr;
+      trc = nullptr;
 
       assert(_destructed);
     }
@@ -1092,129 +1092,129 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco1;
+      AutoPtr<_TestRefCounting> trc1;
 
-      AutoPtr<_TestRefCountingObject> trco2;
+      AutoPtr<_TestRefCounting> trc2;
 
-      trco1.swap(trco2);
+      trc1.swap(trc2);
 
       assert(_nConstructings == 0U);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == nullptr);
 
-      assert(trco2 == nullptr);
+      assert(trc2 == nullptr);
 
-      _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
+      _TestRefCounting *_trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      trco1.swap(trco2);
-
-      assert(_nConstructings == 1U);
-
-      assert(!_destructed);
-
-      assert(trco1 == nullptr);
-
-      assert(trco2 == _trco1);
-
-      _trco1->deref();
-
-      assert(!_destructed);
-
-      trco2 = nullptr;
-
-      assert(_destructed);
-
-      _recoverState();
-
-      _TestRefCountingObject *_trco2 = new _TestRefCountingObject();
-
-      trco2 = _trco2;
-
-      trco1.swap(trco2);
+      trc1.swap(trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == nullptr);
 
-      _trco2->deref();
+      assert(trc2 == _trc1);
+
+      _trc1->deref();
 
       assert(!_destructed);
 
-      assert(trco2 == nullptr);
-
-      trco1 = nullptr;
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *_trc2 = new _TestRefCounting();
 
-      trco1 = trco;
+      trc2 = _trc2;
 
-      trco2 = trco;
-
-      trco1.swap(trco2);
+      trc1.swap(trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == trco);
+      assert(trc1 == _trc2);
 
-      assert(trco2 == trco);
-
-      trco->deref();
+      _trc2->deref();
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      assert(trc2 == nullptr);
 
-      assert(!_destructed);
-
-      trco2 = nullptr;
+      trc1 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco1 = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = trc;
 
-      _trco2 = new _TestRefCountingObject();
+      trc2 = trc;
 
-      trco2 = _trco2;
+      trc1.swap(trc2);
 
-      trco1.swap(trco2);
+      assert(_nConstructings == 1U);
+
+      assert(!_destructed);
+
+      assert(trc1 == trc);
+
+      assert(trc2 == trc);
+
+      trc->deref();
+
+      assert(!_destructed);
+
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
+
+      assert(_destructed);
+
+      _recoverState();
+
+      _trc1 = new _TestRefCounting();
+
+      trc1 = _trc1;
+
+      _trc2 = new _TestRefCounting();
+
+      trc2 = _trc2;
+
+      trc1.swap(trc2);
 
       assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
-      assert(trco1 == _trco2);
+      assert(trc1 == _trc2);
 
-      _trco2->deref();
-
-      assert(!_destructed);
-
-      assert(trco2 == _trco1);
-
-      _trco1->deref();
+      _trc2->deref();
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      assert(trc2 == _trc1);
 
-      assert(_destructed == _trco2);
+      _trc1->deref();
 
-      trco2 = nullptr;
+      assert(!_destructed);
 
-      assert(_destructed == _trco1);
+      trc1 = nullptr;
+
+      assert(_destructed == _trc2);
+
+      trc2 = nullptr;
+
+      assert(_destructed == _trc1);
     }
 
     _recoverState();
@@ -1222,115 +1222,115 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco1;
+      AutoPtr<_TestRefCounting> trc1;
 
-      AutoPtr<_TestRefCountingObject> trco2;
+      AutoPtr<_TestRefCounting> trc2;
 
-      assert(trco1 == trco2);
+      assert(trc1 == trc2);
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
+      _TestRefCounting *_trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
-      assert(!(trco1 == trco2));
-
-      assert(_nConstructings == 1U);
-
-      assert(!_destructed);
-
-      assert(trco1 == _trco1);
-
-      assert(trco2 == nullptr);
-
-      _trco1->deref();
-
-      assert(!_destructed);
-
-      trco1 = nullptr;
-
-      assert(_destructed);
-
-      _recoverState();
-
-      _TestRefCountingObject *_trco2 = new _TestRefCountingObject();
-
-      trco1 = nullptr;
-
-      trco2 = _trco2;
-
-      assert(!(trco1 == trco2));
+      assert(!(trc1 == trc2));
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == _trc1);
 
-      assert(trco2 == _trco2);
+      assert(trc2 == nullptr);
 
-      _trco2->deref();
+      _trc1->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc1 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *_trc2 = new _TestRefCounting();
 
-      trco1 = trco;
+      trc1 = nullptr;
 
-      trco2 = trco;
+      trc2 = _trc2;
 
-      trco->deref();
-
-      assert(trco1 == trco2);
+      assert(!(trc1 == trc2));
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      assert(trc1 == nullptr);
+
+      assert(trc2 == _trc2);
+
+      _trc2->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco1 = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = trc;
 
-      _trco1->deref();
+      trc2 = trc;
 
-      _trco2 = new _TestRefCountingObject();
+      trc->deref();
 
-      trco2 = _trco2;
+      assert(trc1 == trc2);
 
-      _trco2->deref();
+      assert(_nConstructings == 1U);
 
-      assert(!(trco1 == trco2));
+      assert(!_destructed);
+
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
+
+      assert(_destructed);
+
+      _recoverState();
+
+      _trc1 = new _TestRefCounting();
+
+      trc1 = _trc1;
+
+      _trc1->deref();
+
+      _trc2 = new _TestRefCounting();
+
+      trc2 = _trc2;
+
+      _trc2->deref();
+
+      assert(!(trc1 == trc2));
 
       assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      trc1 = nullptr;
 
-      assert(_destructed == _trco1);
+      assert(_destructed == _trc1);
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
-      assert(_destructed == _trco2);
+      assert(_destructed == _trc2);
     }
 
     _recoverState();
@@ -1338,115 +1338,115 @@ int main(int argc, char const *argv[])
 
   {
     {
-      AutoPtr<_TestRefCountingObject> trco1;
+      AutoPtr<_TestRefCounting> trc1;
 
-      AutoPtr<_TestRefCountingObject> trco2;
+      AutoPtr<_TestRefCounting> trc2;
 
-      assert(!(trco1 != trco2));
+      assert(!(trc1 != trc2));
 
       assert(_nConstructings == 0U);
 
-      _TestRefCountingObject *_trco1 = new _TestRefCountingObject();
+      _TestRefCounting *_trc1 = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = _trc1;
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
-      assert(trco1 != trco2);
-
-      assert(_nConstructings == 1U);
-
-      assert(!_destructed);
-
-      assert(trco1 == _trco1);
-
-      assert(trco2 == nullptr);
-
-      _trco1->deref();
-
-      assert(!_destructed);
-
-      trco1 = nullptr;
-
-      assert(_destructed);
-
-      _recoverState();
-
-      _TestRefCountingObject *_trco2 = new _TestRefCountingObject();
-
-      trco1 = nullptr;
-
-      trco2 = _trco2;
-
-      assert(trco1 != trco2);
+      assert(trc1 != trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      assert(trco1 == nullptr);
+      assert(trc1 == _trc1);
 
-      assert(trco2 == _trco2);
+      assert(trc2 == nullptr);
 
-      _trco2->deref();
+      _trc1->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc1 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _TestRefCountingObject *trco = new _TestRefCountingObject();
+      _TestRefCounting *_trc2 = new _TestRefCounting();
 
-      trco1 = trco;
+      trc1 = nullptr;
 
-      trco2 = trco;
+      trc2 = _trc2;
 
-      trco->deref();
-
-      assert(!(trco1 != trco2));
+      assert(trc1 != trc2);
 
       assert(_nConstructings == 1U);
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      assert(trc1 == nullptr);
+
+      assert(trc2 == _trc2);
+
+      _trc2->deref();
 
       assert(!_destructed);
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
       assert(_destructed);
 
       _recoverState();
 
-      _trco1 = new _TestRefCountingObject();
+      _TestRefCounting *trc = new _TestRefCounting();
 
-      trco1 = _trco1;
+      trc1 = trc;
 
-      _trco1->deref();
+      trc2 = trc;
 
-      _trco2 = new _TestRefCountingObject();
+      trc->deref();
 
-      trco2 = _trco2;
+      assert(!(trc1 != trc2));
 
-      _trco2->deref();
+      assert(_nConstructings == 1U);
 
-      assert(trco1 != trco2);
+      assert(!_destructed);
+
+      trc1 = nullptr;
+
+      assert(!_destructed);
+
+      trc2 = nullptr;
+
+      assert(_destructed);
+
+      _recoverState();
+
+      _trc1 = new _TestRefCounting();
+
+      trc1 = _trc1;
+
+      _trc1->deref();
+
+      _trc2 = new _TestRefCounting();
+
+      trc2 = _trc2;
+
+      _trc2->deref();
+
+      assert(trc1 != trc2);
 
       assert(_nConstructings == 2U);
 
       assert(!_destructed);
 
-      trco1 = nullptr;
+      trc1 = nullptr;
 
-      assert(_destructed == _trco1);
+      assert(_destructed == _trc1);
 
-      trco2 = nullptr;
+      trc2 = nullptr;
 
-      assert(_destructed == _trco2);
+      assert(_destructed == _trc2);
     }
 
     _recoverState();
@@ -1462,7 +1462,7 @@ int main(int argc, char const *argv[])
   }
 
   {
-    NEW<_TestRefCountingObject>();
+    NEW<_TestRefCounting>();
 
     assert(_nConstructings == 1U);
 
@@ -1470,19 +1470,19 @@ int main(int argc, char const *argv[])
 
     _recoverState();
 
-    AutoPtr<_TestRefCountingObject> trco = NEW<_TestRefCountingObject>();
+    AutoPtr<_TestRefCounting> trc = NEW<_TestRefCounting>();
 
-    assert(trco == _constructed);
+    assert(trc == _constructed);
 
     assert(!_destructed);
 
-    trco = nullptr;
+    trc = nullptr;
 
     assert(_destructed);
 
     _recoverState();
 
-    NEW<_TestRefCountingObject>(_NEW__ARGUMENTS);
+    NEW<_TestRefCounting>(_NEW__ARGUMENTS);
 
     assert(_nConstructings == 1U);
 
@@ -1492,13 +1492,13 @@ int main(int argc, char const *argv[])
 
     _recoverState();
 
-    trco = NEW<_TestRefCountingObject>(_NEW__ARGUMENTS);
+    trc = NEW<_TestRefCounting>(_NEW__ARGUMENTS);
 
-    assert(trco == _constructed);
+    assert(trc == _constructed);
 
     assert(!_destructed);
 
-    trco = nullptr;
+    trc = nullptr;
 
     assert(_destructed);
 

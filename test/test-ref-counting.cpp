@@ -24,88 +24,88 @@ using namespace Test;
 
 static bool _destructed = false;
 
-class _TestRefCountingObject: public RefCounting {
+class _TestRefCounting: public RefCounting {
 public:
-  _TestRefCountingObject(void) = default;
+  _TestRefCounting(void) = default;
 
 protected:
-  ~_TestRefCountingObject() noexcept
+  ~_TestRefCounting() noexcept
   {
     _destructed = true;
   }
 };
 
-static_assert(RefCounting::CHECK<_TestRefCountingObject>::value, "");
+static_assert(RefCounting::CHECK<_TestRefCounting>::value, "");
 
 int main(int argc, char const *argv[])
 {
-  _TestRefCountingObject *trco = new _TestRefCountingObject();
+  _TestRefCounting *trc = new _TestRefCounting();
 
   int n = rand(_RAND_MAX);
 
   for (int i = 0; i < n; ++i)
-    trco->ref();
+    trc->ref();
 
   for (int i = 0; i < n; ++i)
-    trco->deref();
+    trc->deref();
 
   assert(!_destructed);
 
   n = rand(_RAND_MAX);
 
   for (int i = 0; i < n; ++i) {
-    _TestRefCountingObject *_trco = trco->ref<_TestRefCountingObject>();
+    _TestRefCounting *_trc = trc->ref<_TestRefCounting>();
 
-    assert(_trco == trco);
+    assert(_trc == trc);
   }
 
   for (int i = 0; i < n; ++i)
-    trco->deref();
+    trc->deref();
 
   assert(!_destructed);
 
   n = rand(_RAND_MAX);
 
   for (int i = 0; i < n; ++i) {
-    _TestRefCountingObject const *_trco = trco->ref<_TestRefCountingObject const>();
+    _TestRefCounting const *_trc = trc->ref<_TestRefCounting const>();
 
-    assert(_trco == trco);
+    assert(_trc == trc);
   }
 
   for (int i = 0; i < n; ++i)
-    trco->deref();
+    trc->deref();
 
   assert(!_destructed);
 
-  _TestRefCountingObject const *ctrco = const_cast<_TestRefCountingObject const *>(trco);
+  _TestRefCounting const *ctrc = const_cast<_TestRefCounting const *>(trc);
 
   n = rand(_RAND_MAX);
 
   for (int i = 0; i < n; ++i) {
-    _TestRefCountingObject const *_ctrco = ctrco->ref<_TestRefCountingObject>();
+    _TestRefCounting const *_ctrc = ctrc->ref<_TestRefCounting>();
 
-    assert(_ctrco == ctrco);
+    assert(_ctrc == ctrc);
   }
 
   for (int i = 0; i < n; ++i)
-    ctrco->deref();
+    ctrc->deref();
 
   assert(!_destructed);
 
   n = rand(_RAND_MAX);
 
   for (int i = 0; i < n; ++i) {
-    _TestRefCountingObject const *_ctrco = ctrco->ref<_TestRefCountingObject const>();
+    _TestRefCounting const *_ctrc = ctrc->ref<_TestRefCounting const>();
 
-    assert(_ctrco == ctrco);
+    assert(_ctrc == ctrc);
   }
 
   for (int i = 0; i < n; ++i)
-    ctrco->deref();
+    ctrc->deref();
 
   assert(!_destructed);
 
-  trco->deref();
+  trc->deref();
 
   assert(_destructed);
 

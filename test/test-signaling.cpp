@@ -32,16 +32,16 @@ using namespace std;
 
 using namespace Test;
 
-class _TestSignalingObject: public Signaling {
+class _TestSignaling: public Signaling {
 public:
   enum {
     SIGNAL_PASS_VOID,
     SIGNAL_PASS_NON_VOID_FIXED
   };
 
-  _TestSignalingObject(void) = default;
+  _TestSignaling(void) = default;
 
-  ~_TestSignalingObject() = default;
+  ~_TestSignaling() = default;
 
   template <int signal, class ... As>
   void notify(As... arguments) noexcept
@@ -51,18 +51,18 @@ public:
 };
 
 template <>
-struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_VOID> {
+struct Signaling::SIGNALIZE<_TestSignaling, _TestSignaling::SIGNAL_PASS_VOID> {
   typedef Signaling::SIGNATURE<void> SIGNATURE;
 };
 
 template <>
-struct Signaling::SIGNALS<_TestSignalingObject, _TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED> {
+struct Signaling::SIGNALIZE<_TestSignaling, _TestSignaling::SIGNAL_PASS_NON_VOID_FIXED> {
   typedef Signaling::SIGNATURE<_PASS_NON_VOID_FIXED__SIGNATURE> SIGNATURE;
 };
 
 static unsigned _nPassingVoid = 0U;
 
-static vector<_TestSignalingObject *> _tsosPassingVoid;
+static vector<_TestSignaling *> _tssPassingVoid;
 
 static vector<void *> _vdataPassingVoid;
 
@@ -72,7 +72,7 @@ static vector<void *> _vdetachedDataPassingVoid;
 
 static unsigned _nPassingNonVoidFixed = 0U;
 
-static vector<_TestSignalingObject *> _tsosPassingNonVoidFixed;
+static vector<_TestSignaling *> _tssPassingNonVoidFixed;
 
 static vector<Arguments> _argumentssPassingNonVoidFixed;
 
@@ -86,7 +86,7 @@ static void _recoverState(void) noexcept
 {
   _nPassingVoid = 0U;
 
-  _tsosPassingVoid.clear();
+  _tssPassingVoid.clear();
 
   _vdataPassingVoid.clear();
 
@@ -96,7 +96,7 @@ static void _recoverState(void) noexcept
 
   _nPassingNonVoidFixed = 0U;
 
-  _tsosPassingNonVoidFixed.clear();
+  _tssPassingNonVoidFixed.clear();
 
   _argumentssPassingNonVoidFixed.clear();
 
@@ -118,12 +118,12 @@ static void _detechDataPassingVoid(void *data) noexcept
   }
 }
 
-static void _handlePassVoid(_TestSignalingObject &tso, void *data) noexcept
+static void _handlePassVoid(_TestSignaling &ts, void *data) noexcept
 {
   try {
     ++_nPassingVoid;
 
-    _tsosPassingVoid.emplace_back(&tso);
+    _tssPassingVoid.emplace_back(&ts);
 
     _vdataPassingVoid.emplace_back(data);
   } catch (...) {
@@ -143,12 +143,12 @@ static void _detechDataPassingNonVoidFixed(void *data) noexcept
 }
 
 template <class ... As>
-static void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, void *data) noexcept
+static void _handlePassNonVoidFixed(_TestSignaling &ts, As... arguments, void *data) noexcept
 {
   try {
     ++_nPassingNonVoidFixed;
 
-    _tsosPassingNonVoidFixed.emplace_back(&tso);
+    _tssPassingNonVoidFixed.emplace_back(&ts);
 
     _argumentssPassingNonVoidFixed.emplace_back(arguments...);
 
@@ -160,7 +160,7 @@ static void _handlePassNonVoidFixed(_TestSignalingObject &tso, As... arguments, 
 
 int main(int argc, char const *argv[])
 {
-  _TestSignalingObject tso;
+  _TestSignaling ts;
 
   char *data = new char;
 
@@ -169,18 +169,18 @@ int main(int argc, char const *argv[])
   vector<Signaling::ConnectionId> cis(n);
 
   for (unsigned i = 0U; i < n; ++i)
-    cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
-        &tso,
+    cis[i] = _TestSignaling::connect<_TestSignaling::SIGNAL_PASS_VOID>(
+        &ts,
         &_handlePassVoid,
         data,
         &_detechDataPassingVoid);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
+  ts.notify<_TestSignaling::SIGNAL_PASS_VOID>();
 
   assert(_nPassingVoid == n);
 
-  for (auto i = _tsosPassingVoid.begin(), end = _tsosPassingVoid.end(); i != end; ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingVoid.begin(), end = _tssPassingVoid.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _vdataPassingVoid.begin(), end = _vdataPassingVoid.end(); i != end; ++i)
     assert(*i == data);
@@ -193,7 +193,7 @@ int main(int argc, char const *argv[])
     si.emplace(rand(n));
 
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
-    tso.disconnect(cis[*i]);
+    ts.disconnect(cis[*i]);
 
   size_t sis = si.size();
 
@@ -204,19 +204,19 @@ int main(int argc, char const *argv[])
       ++i)
     assert(*i == data);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
+  ts.notify<_TestSignaling::SIGNAL_PASS_VOID>();
 
   assert(_nPassingVoid == n - sis);
 
-  for (auto i = _tsosPassingVoid.begin(), end = _tsosPassingVoid.end(); i != end; ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingVoid.begin(), end = _tssPassingVoid.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _vdataPassingVoid.begin(), end = _vdataPassingVoid.end(); i != end; ++i)
     assert(*i == data);
 
   _recoverState();
 
-  tso.disconnect(_TestSignalingObject::SIGNAL_PASS_VOID);
+  ts.disconnect(_TestSignaling::SIGNAL_PASS_VOID);
 
   assert(_nDetachingDataPassingVoid == n - sis);
 
@@ -225,7 +225,7 @@ int main(int argc, char const *argv[])
       ++i)
     assert(*i == data);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
+  ts.notify<_TestSignaling::SIGNAL_PASS_VOID>();
 
   assert(_nPassingVoid == 0U);
 
@@ -238,20 +238,18 @@ int main(int argc, char const *argv[])
   cis.resize(n);
 
   for (unsigned i = 0U; i < n; ++i)
-    cis[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
-        &tso,
+    cis[i] = _TestSignaling::connect<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(
+        &ts,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
         data,
         &_detechDataPassingNonVoidFixed);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
+  ts.notify<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingNonVoidFixed == n);
 
-  for (auto i = _tsosPassingNonVoidFixed.begin(), end = _tsosPassingNonVoidFixed.end();
-      i != end;
-      ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingNonVoidFixed.begin(), end = _tssPassingNonVoidFixed.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _argumentssPassingNonVoidFixed.begin(), end = _argumentssPassingNonVoidFixed.end();
       i != end;
@@ -271,7 +269,7 @@ int main(int argc, char const *argv[])
     si.emplace(rand(n));
 
   for (auto i = si.begin(), end = si.end(); i != end; ++i)
-    tso.disconnect(cis[*i]);
+    ts.disconnect(cis[*i]);
 
   sis = si.size();
 
@@ -283,14 +281,12 @@ int main(int argc, char const *argv[])
       ++i)
     assert(*i == data);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
+  ts.notify<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingNonVoidFixed == n - sis);
 
-  for (auto i = _tsosPassingNonVoidFixed.begin(), end = _tsosPassingNonVoidFixed.end();
-      i != end;
-      ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingNonVoidFixed.begin(), end = _tssPassingNonVoidFixed.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _argumentssPassingNonVoidFixed.begin(), end = _argumentssPassingNonVoidFixed.end();
       i != end;
@@ -304,7 +300,7 @@ int main(int argc, char const *argv[])
 
   _recoverState();
 
-  tso.disconnect(_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED);
+  ts.disconnect(_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED);
 
   assert(_nDetachingDataPassingNonVoidFixed == n - sis);
 
@@ -314,7 +310,7 @@ int main(int argc, char const *argv[])
       ++i)
     assert(*i == data);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
+  ts.notify<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingNonVoidFixed == 0U);
 
@@ -325,8 +321,8 @@ int main(int argc, char const *argv[])
   vector<Signaling::ConnectionId> cis1(n1);
 
   for (unsigned i = 0U; i < n1; ++i)
-    cis1[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_VOID>(
-        &tso,
+    cis1[i] = _TestSignaling::connect<_TestSignaling::SIGNAL_PASS_VOID>(
+        &ts,
         &_handlePassVoid,
         data,
         &_detechDataPassingVoid);
@@ -336,30 +332,28 @@ int main(int argc, char const *argv[])
   vector<Signaling::ConnectionId> cis2(n2);
 
   for (unsigned i = 0U; i < n2; ++i)
-    cis2[i] = _TestSignalingObject::connect<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(
-        &tso,
+    cis2[i] = _TestSignaling::connect<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(
+        &ts,
         &_handlePassNonVoidFixed<_PASS_NON_VOID_FIXED__SIGNATURE>,
         data,
         &_detechDataPassingNonVoidFixed);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
+  ts.notify<_TestSignaling::SIGNAL_PASS_VOID>();
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
+  ts.notify<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingVoid == n1);
 
-  for (auto i = _tsosPassingVoid.begin(), end = _tsosPassingVoid.end(); i != end; ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingVoid.begin(), end = _tssPassingVoid.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _vdataPassingVoid.begin(), end = _vdataPassingVoid.end(); i != end; ++i)
     assert(*i == data);
 
   assert(_nPassingNonVoidFixed == n2);
 
-  for (auto i = _tsosPassingNonVoidFixed.begin(), end = _tsosPassingNonVoidFixed.end();
-      i != end;
-      ++i)
-    assert(*i == &tso);
+  for (auto i = _tssPassingNonVoidFixed.begin(), end = _tssPassingNonVoidFixed.end(); i != end; ++i)
+    assert(*i == &ts);
 
   for (auto i = _argumentssPassingNonVoidFixed.begin(), end = _argumentssPassingNonVoidFixed.end();
       i != end;
@@ -373,7 +367,7 @@ int main(int argc, char const *argv[])
 
   _recoverState();
 
-  tso.disconnect();
+  ts.disconnect();
 
   assert(_nDetachingDataPassingVoid == n1);
 
@@ -390,9 +384,9 @@ int main(int argc, char const *argv[])
       ++i)
     assert(*i == data);
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_VOID>();
+  ts.notify<_TestSignaling::SIGNAL_PASS_VOID>();
 
-  tso.notify<_TestSignalingObject::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
+  ts.notify<_TestSignaling::SIGNAL_PASS_NON_VOID_FIXED>(_PASS_NON_VOID_FIXED__ARGUMENTS);
 
   assert(_nPassingVoid == 0U);
 

@@ -77,7 +77,7 @@ public:
   using SIGNATURE = _SIGNATURE<As...>;
 
   template <class S, int signal, EIIBOSSVIT<S> = 0>
-  struct SIGNALS {};
+  struct SIGNALIZE {};
 
   struct ConnectionId {
     int signal;
@@ -96,7 +96,7 @@ public:
 
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
-    typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
+    typedef typename SIGNALIZE<S, signal>::SIGNATURE _SIGNATURE;
 
     static_assert(IsInstanceOfSIGNATURE<_SIGNATURE>::value, "");
 
@@ -112,7 +112,7 @@ public:
 
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
-    typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
+    typedef typename SIGNALIZE<S, signal>::SIGNATURE _SIGNATURE;
 
     static_assert(IsInstanceOfSIGNATURE<_SIGNATURE>::value, "");
 
@@ -192,7 +192,7 @@ protected:
 
     static_assert(std::is_base_of<Signaling, S>::value, "");
 
-    typedef typename SIGNALS<S, signal>::SIGNATURE _SIGNATURE;
+    typedef typename SIGNALIZE<S, signal>::SIGNATURE _SIGNATURE;
 
     static_assert(IsInstanceOfSIGNATURE<_SIGNATURE>::value, "");
 
