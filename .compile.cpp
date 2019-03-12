@@ -4,9 +4,9 @@
  *
  */
 
-#include <auto-ptr.hpp>
-#include <ref-counting.hpp>
-#include <signaling.hpp>
+#include "include/auto-ptr.hpp"
+#include "include/ref-counting.hpp"
+#include "include/signaling.hpp"
 
 
 

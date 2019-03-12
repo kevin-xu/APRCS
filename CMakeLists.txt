@@ -8,8 +8,6 @@ project(APRCS LANGUAGES CXX)
 
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -std=c++17 -pedantic-errors -Wall")
 
-include_directories("include")
-
 add_library(APRCS OBJECT ".compile.cpp")
 
 enable_testing()
