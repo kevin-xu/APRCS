@@ -2,8 +2,6 @@
 # Author: Kevin XU <kevin.xu.1982.02.06@gmail.com>
 #
 
-include_directories("${PROJECT_SOURCE_DIR}/include")
-
 add_executable(test-auto-ptr "test-auto-ptr.cpp")
 
 add_executable(test-ref-counting "test-ref-counting.cpp")

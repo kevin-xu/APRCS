@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include <signaling.hpp>
+#include "../include/signaling.hpp"
 
 #include "arguments.hpp"
 #include "rand.hpp"

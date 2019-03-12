@@ -10,8 +10,8 @@
 #include <string>
 #include <utility>
 
-#include <auto-ptr.hpp>
-#include <ref-counting.hpp>
+#include "../include/auto-ptr.hpp"
+#include "../include/ref-counting.hpp"
 
 #include "arguments.hpp"
 
